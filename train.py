@@ -18,23 +18,37 @@ def main():
     #      - universe_file: relative path under instruments/ defining stock universe
     #      - start_date, end_date: backtest period
     cfg_path = "configs/config.yaml"
-    with open(cfg_path, "r") as f: 
+    with open(cfg_path) as f: 
         config = yaml.safe_load(f)
     
     # init QLib to point at data directory 
     # Qlib uses this to serve all calendar, universe, and feature queries
-    provider_uri = os.path.expanduser(config["provider_uri"])
-    qlib.init(provider_uri=provider_uri, region=config["region"])
+    uri = os.path.expanduser(config["provider_uri"])
+    qlib.init(provider_uri=uri, region=config["region"])
 
     # read universe file manually 
     # universe_file should be something like "csiall.txt" 
-    uni_path = os.path.join(provider_uri, "instruments", config["universe_file"])
-    with open(uni_path, "r") as f: 
-        tickers = [line.strip().split("\t") for line in f if line.strip()]
+    uni_path = os.path.join(uri, "instruments", config["universe_file"])
+    with open(uni_path) as f: 
+        tickers = [line.strip().split("\t")[0] for line in f if line.strip()]
+    print(f"Universe: {len(tickers)} tickers, sample: {tickers[:5]}")
 
-    # sanity check. print universe size and first five tickers 
-    print(f"Loaded universe '{config['universe_file']}': {len(tickers)} tickers")
-    print("First 5 tickers:", tickers[:5])
+    # pick top-N for testing (or use all)
+    N = config.get("sample_size", 10) 
+    sample = tickers[:N] 
+
+    # fetch features 
+    fields = config["fields"]
+    df = D.features(
+        instruments=sample,
+        fields=fields,
+        start_time=config["start_date"],
+        end_time=config["end_date"],
+    )
+
+    # sanity check dataframe 
+    print("feature dataframe shape:", df.shape) 
+    print(df.head())
 
 if __name__ == "__main__":
     main()
