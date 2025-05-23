@@ -2,7 +2,7 @@
 
 This project builds and evaluates a Reinforcement Learning agent that learns how to split a large order over time to minimize market impact and execution cost, comparing its performance to classic strategies like TWAP (time-weighted average price) or VWAP (volume-weighted average price).
 
-Built on top of Microsoft Qlib, this project uses historical market data and a gym-compatible environment to train agents like PPO in a realistic execution scenario.
+Built on top of Qlib (https://github.com/microsoft/qlib), this project uses historical market data and a gym-compatible environment to train agents like PPO in a realistic execution scenario.
 
 ## Motivation 
 
