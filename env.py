@@ -1,90 +1,52 @@
-import gym
-import numpy as np
-import pandas as pd
+# env.py
+import os
+from pathlib import Path
 
-class TradingEnv(gym.Env):
+import qlib
+from qlib.backtest.decision import Order, OrderDir
+from qlib.rl.order_execution.simulator_simple import SingleAssetOrderExecutionSimple
+
+def make_env(config: dict) -> SingleAssetOrderExecutionSimple:
     """
-    trading environment wrapping QLib data for RL.
-    Observation: cleaned historical feature vectors for a window of days.
-    Action: a scalar in [-1, 1] representing position (short to long).
-    Reward: daily PnL.
+    Initializes QLib and returns a SingleAssetOrderExecutionSimple 
+    (RL order-execution env).
+    config must include:
+      - provider_uri: path to qlib_data ("~/.qlib/qlib_data/cn_data")
+      - region: "cn" or "us"
+      - instrument: a single ticker string (e.g. "SZ000001")
+      - start_time, end_time: ISO datetimes for the order (e.g. "2025-05-22 09:31:00")
+      - amount: total shares to execute
+      - direction: "buy" or "sell"
+      - data_granularity: (optional, default=1)
+      - ticks_per_step: (optional, how many ticks in each RL step)
+      - vol_threshold: (optional, max fraction of market volume tradable)
+      - feature_columns_today / feature_columns_yesterday: (optional lists of extra columns)
     """
-    metadata = {"render.modes": ["human"]}
+    # init QLib
+    provider_uri = os.path.expanduser(config["provider_uri"])
+    qlib.init(provider_uri=provider_uri, region=config["region"])
 
-    def __init__(
-        self,
-        data: pd.DataFrame,
-        window_size: int = 10,
-        transaction_cost: float = 1e-4,
-    ):
-        super().__init__()
-        # DataFrame indexed by (instrument, datetime), columns=features
-        self.data = data
-        self.window = window_size
-        self.tc = transaction_cost
+    # build an Order for a single‐asset execution
+    dir_str = config.get("direction", "buy").lower()
+    direction = OrderDir.BUY if dir_str == "buy" else OrderDir.SELL
 
-        # Build index of dates and instruments
-        self.dates = sorted(data.index.get_level_values("datetime").unique())
-        self.tickers = sorted(data.index.get_level_values("instrument").unique())
+    order = Order(
+        stock_id=config["instrument"],
+        start_time=config["start_time"],
+        end_time=config["end_time"],
+        amount=float(config["amount"]),
+        direction=direction,
+    )
 
-        # Action and observation spaces
-        # Single continuous action: position [-1,1]
-        self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(1,), dtype=np.float32)
-        # Observation: window x feature dims
-        feat_dim = data.shape[1]
-        self.observation_space = gym.spaces.Box(
-            low=-np.inf, high=np.inf, shape=(self.window, feat_dim), dtype=np.float32
-        )
+    # construct the Simple SAOE simulator
+    env = SingleAssetOrderExecutionSimple(
+        order=order,
+        data_dir=Path(provider_uri),
+        feature_columns_today=config.get("feature_columns_today", []),
+        feature_columns_yesterday=config.get("feature_columns_yesterday", []),
+        data_granularity=int(config.get("data_granularity", 1)),
+        ticks_per_step=int(config.get("ticks_per_step", 1)),
+        vol_threshold=config.get("vol_threshold", None),
+    )
 
-        # Internal pointers
-        self.current_step = self.window
-        self.position = 0.0
-
-    def reset(self):
-        """Resets to the first possible state."""
-        self.current_step = self.window
-        self.position = 0.0
-        return self._get_observation()
-
-    def _get_observation(self):
-        date = self.dates[self.current_step]
-        # extract last `window` days for all tickers and flatten
-        start = self.current_step - self.window
-        window_dates = self.dates[start : self.current_step]
-        obs = []
-        for d in window_dates:
-            X = self.data.xs(d, level="datetime").values  # shape: (n_tickers, feat_dim)
-            obs.append(X)
-        obs = np.stack(obs, axis=0)
-        return obs.astype(np.float32)
-
-    def step(self, action):
-        """
-        Takes action, computes reward (PnL), and advances one day.
-        """
-        action = float(action)
-        prev_date = self.dates[self.current_step - 1]
-        curr_date = self.dates[self.current_step]
-
-        # Price change vector for all tickers
-        open_prev = self.data.xs(prev_date, level="datetime")["$open"].values
-        close_curr = self.data.xs(curr_date, level="datetime")["$close"].values
-        returns = (close_curr - open_prev) / open_prev
-
-        # PnL = position * return, averaged across universe
-        pnl = np.mean(action * returns) - self.tc * abs(action - self.position)
-        self.position = action
-        reward = pnl
-
-        self.current_step += 1
-        done = self.current_step >= len(self.dates)
-
-        obs = self._get_observation() if not done else None
-        info = {"pnl": pnl}
-        return obs, reward, done, info
-
-    def render(self, mode="human"):
-        pass
-
-    def close(self):
-        pass
+    return env
