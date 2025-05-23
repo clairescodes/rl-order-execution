@@ -19,7 +19,7 @@ def main():
     # heterogenous gaps (1, 2, … 12 days) are just weekends & holidays
     print("Day-to-day gaps:", (pd.to_datetime(cal[1:]) - pd.to_datetime(cal[:-1])).unique())
 
-    # read universe manually
+    # maually read the index file we want. this case csiall.txt 
     instr_path = os.path.expanduser(
         "~/.qlib/qlib_data/cn_data/instruments/csiall.txt")
     with open(instr_path) as f:
@@ -42,6 +42,8 @@ def main():
           .groupby("instrument")[["$open","$high","$low","$close","$volume"]]
           .apply(lambda d: d.isna().sum())
     )
+    # output - missing values turn out to be  days before a stock was listed
+    # bc Qlib  pads every symbol to the full calendar
     print("Missing values per instrument:\n", miss)
 
 if __name__ == "__main__":

@@ -1,0 +1,14 @@
+# configs/config.yaml
+
+# where on disk the Qlib binary data lives
+provider_uri: "~/.qlib/qlib_data/cn_data"
+
+# which market conventions to use ("cn" or "us")
+region: "cn"
+
+# which universe file under instruments/ to load
+universe_file: "csiall.txt"
+
+# (use later in backtest)
+start_date: "2015-01-01"
+end_date:   "2024-12-31"
