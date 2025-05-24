@@ -1,23 +1,28 @@
-# configs/config.yaml
+env:
+  provider_uri: "~/.qlib/qlib_data/cn_data"
+  region: "cn"
+  instrument: "SZ000001"            # one ticker per env
+  start_time: "2025-05-22 09:31:00"
+  end_time:   "2025-05-22 15:00:00"
+  amount: 1e6
+  direction: "buy"
+  # …any other env params…
 
-# where on disk the Qlib binary data lives
-provider_uri: "~/.qlib/qlib_data/cn_data"
+policy:
+  discount_factor: 0.99
+  gae_lambda:       0.95
+  eps_clip:         0.2
+  value_coef:       0.5
+  ent_coef:         0.0
+  step_per_epoch:   2048
+  repeat_per_collect: 4
+  batch_size:       64
+  # …etc…
 
-# which market conventions to use ("cn" or "us")
-region: "cn"
-
-# which universe file under instruments/ to load
-universe_file: "csiall.txt"
-
-# (use later in backtest)
-start_date: "2015-01-01"
-end_date:   "2024-12-31"
-
-fields:
-  - "$open"
-  - "$high"
-  - "$low"
-  - "$close"
-  - "$volume"
-
-sample_size: 50   # optional: just load 50 for initial tests
+training:
+  n_train_envs: 8
+  n_test_envs:  2
+  buffer_size:  16384
+  max_epoch:    100
+  log_dir:      "~/runs/rl_order_exec"
+  # …etc…
