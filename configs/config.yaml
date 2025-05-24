@@ -1,28 +1,30 @@
 env:
+  # where on disk the Qlib binary data lives
   provider_uri: "~/.qlib/qlib_data/cn_data"
+
+  # which market conventions to use ("cn" or "us")
   region: "cn"
-  instrument: "SZ000001"            # one ticker per env
-  start_time: "2025-05-22 09:31:00"
-  end_time:   "2025-05-22 15:00:00"
-  amount: 1e6
-  direction: "buy"
-  # …any other env params…
+
+  # which universe file under instruments/ to load
+  universe_file: "csiall.txt"
+
+  # backtest period
+  start_date: "2015-01-01"
+  end_date:   "2024-12-31"
+
+  # which fields to load
+  fields:
+    - "$open"
+    - "$high"
+    - "$low"
+    - "$close"
+    - "$volume"
+
+  # optional: just load N tickers for quick sanity checks
+  sample_size: 50
 
 policy:
-  discount_factor: 0.99
-  gae_lambda:       0.95
-  eps_clip:         0.2
-  value_coef:       0.5
-  ent_coef:         0.0
-  step_per_epoch:   2048
-  repeat_per_collect: 4
-  batch_size:       64
-  # …etc…
+  # (leave empty or put your PPO‐specific hyperparams here later)
 
 training:
-  n_train_envs: 8
-  n_test_envs:  2
-  buffer_size:  16384
-  max_epoch:    100
-  log_dir:      "~/runs/rl_order_exec"
-  # …etc…
+  # (leave empty or put your trainer hyperparams here later)
