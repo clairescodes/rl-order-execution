@@ -1,6 +1,5 @@
+# preprocessing.py
 """
-preprocessing.py
-
 Provides functions to load and clean multi-instrument time series:
 - fill missing data per instrument
 - clip outliers based on quantiles

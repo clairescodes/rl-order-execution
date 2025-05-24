@@ -1,6 +1,5 @@
+# agent.py
 """
-agent.py
-
 Implements the TradingActorCritic MLP and wraps it in a Tianshou PPOPolicy,
 serving as the agent for continuous-action trading environments.
 """
