@@ -1,24 +1,30 @@
-# configs/config.yaml
+env:
+  # where on disk the Qlib binary data lives
+  provider_uri: "~/.qlib/qlib_data/cn_data"
 
-# where on disk the Qlib binary data lives
-provider_uri: "~/.qlib/qlib_data/cn_data"
+  # which market conventions to use ("cn" or "us")
+  region: "cn"
 
-# which market conventions to use ("cn" or "us")
-region: "cn"
+  # which universe file under instruments/ to load
+  universe_file: "csiall.txt"
 
-# which universe file under instruments/ to load
-universe_file: "csiall.txt"
+  # backtest period
+  start_date: "2015-01-01"
+  end_date:   "2024-12-31"
 
-# (use later in backtest)
-start_date: "2015-01-01"
-end_date:   "2024-12-31"
+  # which fields to load
+  fields:
+    - "$open"
+    - "$high"
+    - "$low"
+    - "$close"
+    - "$volume"
 
-fields:
-  - "$open"
-  - "$high"
-  - "$low"
-  - "$close"
-  - "$volume"
+  # optional: just load N tickers for quick sanity checks
+  sample_size: 50
 
-sample_size: 50   # optional: just load 50 for initial tests
+policy:
+  # (leave empty or put your PPO‐specific hyperparams here later)
 
+training:
+  # (leave empty or put your trainer hyperparams here later)
