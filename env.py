@@ -5,6 +5,7 @@ environment for RL-based order execution from a user-specified config.
 """
 import os
 from pathlib import Path
+import pandas as pd
 
 import qlib
 from qlib.backtest.decision import Order, OrderDir
@@ -36,8 +37,9 @@ def make_env(config: dict) -> SingleAssetOrderExecutionSimple:
 
     order = Order(
         stock_id=config["instrument"],
-        start_time=config["start_time"],
-        end_time=config["end_time"],
+        # parse ISO strings into Timestamps
+        start_time=pd.Timestamp(config["start_time"]),
+        end_time=pd.Timestamp(config["end_time"]),
         amount=float(config["amount"]),
         direction=direction,
     )

@@ -1,19 +1,21 @@
 # configs/config.yaml
 
 env:
+  # where on disk the QLib binary data lives
   provider_uri: "~/.qlib/qlib_data/cn_data"
+  # which market conventions to use (“cn” or “us”)
   region: "cn"
-  universe_file: "csiall.txt"
-  start_date: "2015-01-01"
-  end_date: "2024-12-31"
-  sample_size: 50
+  # single‐asset execution settings:
+  instrument: "SZ000001"            # <-- e.g. pick one to train on
+  start_time: "2025-05-22 09:31:00" # order’s start time (ISO format)
+  end_time:   "2025-05-22 15:00:00" # order’s end time
+  amount: 100000                    # total shares to execute
+  direction: "buy"                  # "buy" or "sell"
 
 policy:
-  # hidden layer sizes for actor & critic
+  # network + PPO hyperparameters
   hidden_sizes: [128, 128]
-  # learning rate for optimizer
   lr: 3e-4
-  # PPO hyperparams
   discount_factor: 0.99
   gae_lambda: 0.95
   eps_clip: 0.2
@@ -24,7 +26,7 @@ policy:
   repeat_per_collect: 4
 
 training:
-  # how many parallel envs to collect from
+  # how many parallel envs for data collection & evaluation
   n_train_envs: 8
   n_test_envs: 2
   buffer_size: 20000
