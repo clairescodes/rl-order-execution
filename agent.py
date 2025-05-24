@@ -1,3 +1,9 @@
+"""
+agent.py
+
+Implements the TradingActorCritic MLP and wraps it in a Tianshou PPOPolicy,
+serving as the agent for continuous-action trading environments.
+"""
 import torch
 import torch.nn as nn
 from tianshou.policy import PPOPolicy

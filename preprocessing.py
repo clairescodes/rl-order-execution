@@ -1,6 +1,11 @@
-# preprocessing.py 
-# handles data I/O and cleaning 
+"""
+preprocessing.py
 
+Provides functions to load and clean multi-instrument time series:
+- fill missing data per instrument
+- clip outliers based on quantiles
+- z-score normalize features
+"""
 import pandas as pd
 
 # Forward-then-backward fill missing values for each instrument

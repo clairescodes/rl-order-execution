@@ -1,4 +1,9 @@
-# env.py
+"""
+env.py
+
+Initializes QLib and constructs a SingleAssetOrderExecutionSimple
+environment for RL-based order execution from a user-specified config.
+"""
 import os
 from pathlib import Path
 
